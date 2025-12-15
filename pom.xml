@@ -10,9 +10,9 @@
         <relativePath/>
     </parent>
     <groupId>com.delonic</groupId>
-    <artifactId>buku-service</artifactId>
+    <artifactId>anggota-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>buku-service</name>
+    <name>anggota-service</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>
@@ -104,6 +104,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <mainClass>com.aldio.anggota.AnggotaApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
