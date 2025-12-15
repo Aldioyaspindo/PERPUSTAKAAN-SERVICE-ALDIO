@@ -17,7 +17,7 @@ pipeline {
                     // Format nama image: nama-service:nama-branch
                     // Contoh hasil: buku-service:main atau buku-service:feature-login
                     // Kita gunakan nama lowercase 'buku-service' agar standar docker
-                    sh "docker build -t buku-service:${env.BRANCH_NAME} ."
+                    sh "docker build -t anggota-service:${env.BRANCH_NAME} ."
                 }
             }
         }
