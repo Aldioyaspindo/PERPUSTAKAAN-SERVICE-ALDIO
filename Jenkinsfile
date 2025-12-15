@@ -2,24 +2,30 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
+                // Mengambil kodingan dari branch saat ini
                 checkout scm
             }
         }
         
-        stage('Build Docker') {
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // env.BRANCH_NAME akan otomatis mengambil nama branch (misal: "service-payment")
-                    // env.BUILD_NUMBER untuk versi build (misal: 1, 2, 3)
+                    echo "Membangun image Spring Boot untuk branch: ${env.BRANCH_NAME}"
                     
-                    echo "Membangun image untuk service: ${env.BRANCH_NAME}"
-                    
-                    // Membuat nama image: nama-repo:nama-branch
-                    // Contoh hasil: microservice:service-payment
-                    sh "docker build -t myproject:${env.BRANCH_NAME} ."
+                    // Format nama image: nama-service:nama-branch
+                    // Contoh hasil: buku-service:main atau buku-service:feature-login
+                    // Kita gunakan nama lowercase 'buku-service' agar standar docker
+                    sh "docker build -t buku-service:${env.BRANCH_NAME} ."
                 }
+            }
+        }
+
+        stage('Verifikasi Image') {
+            steps {
+                // Mengecek apakah image berhasil dibuat
+                sh "docker images | grep buku-service"
             }
         }
     }
