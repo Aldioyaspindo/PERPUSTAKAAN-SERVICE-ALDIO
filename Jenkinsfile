@@ -16,7 +16,7 @@ pipeline {
             steps {
                 script {
                     echo "Membangun image untuk branch: ${env.BRANCH_NAME}"
-                    sh "docker build -t buku-service:${env.BRANCH_NAME} ."
+                    sh "docker build -t anggota-service:${env.BRANCH_NAME} ."
                 }
             }
         }
@@ -37,7 +37,7 @@ pipeline {
                         --name ${CONTAINER_NAME} \
                         --restart unless-stopped \
                         -p ${HOST_PORT}:${CONTAINER_PORT} \
-                        buku-service:${env.BRANCH_NAME}
+                        anggota-service:${env.BRANCH_NAME}
                     """
                 }
             }
