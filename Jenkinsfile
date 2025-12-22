@@ -2,43 +2,33 @@ pipeline {
     agent any
 
     environment {
-        // Nama container saat dijalankan nanti
         CONTAINER_NAME = 'buku-service-prod'
-        // Port di laptop (Host) yang mau dipakai
         HOST_PORT = '9001'
-        // Port di dalam container (sesuai EXPOSE Dockerfile anda)
         CONTAINER_PORT = '8081'
     }
 
     stages {
         stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
         
         stage('Build Docker Image') {
             steps {
                 script {
                     echo "Membangun image untuk branch: ${env.BRANCH_NAME}"
-                    // Kita tag image dengan nama branch
                     sh "docker build -t buku-service:${env.BRANCH_NAME} ."
                 }
             }
         }
 
-        // --- INI TAMBAHANNYA (CD) ---
+        // --- INI YANG BENAR (Tanpa 'when') ---
         stage('Deploy to Local Prod') {
-            // Hanya deploy jika yang di-push adalah branch 'main'
-            when {
-                branch 'main'
-            }
+            // Bagian 'when' sudah dihapus agar branch APAPUN bisa di-deploy
             steps {
                 script {
                     echo "Mendeploy ke port ${HOST_PORT}..."
                     
-                    // 1. Hapus container lama jika ada (biar update)
-                    // "|| true" agar tidak error jika container belum ada
+                    // 1. Hapus container lama
                     sh "docker rm -f ${CONTAINER_NAME} || true"
                     
                     // 2. Jalankan container baru
