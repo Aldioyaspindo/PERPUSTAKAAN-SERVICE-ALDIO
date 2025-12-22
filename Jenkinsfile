@@ -1,31 +1,45 @@
 pipeline {
     agent any
 
+    environment {
+        CONTAINER_NAME = 'anggota-service-prod'
+        HOST_PORT = '9002'
+        CONTAINER_PORT = '8082'
+    }
+
     stages {
         stage('Checkout Code') {
-            steps {
-                // Mengambil kodingan dari branch saat ini
-                checkout scm
-            }
+            steps { checkout scm }
         }
         
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Membangun image Spring Boot untuk branch: ${env.BRANCH_NAME}"
-                    
-                    // Format nama image: nama-service:nama-branch
-                    // Contoh hasil: buku-service:main atau buku-service:feature-login
-                    // Kita gunakan nama lowercase 'buku-service' agar standar docker
-                    sh "docker build -t anggota-service:${env.BRANCH_NAME} ."
+                    echo "Membangun image untuk branch: ${env.BRANCH_NAME}"
+                    sh "docker build -t buku-service:${env.BRANCH_NAME} ."
                 }
             }
         }
 
-        stage('Verifikasi Image') {
+        // --- INI YANG BENAR (Tanpa 'when') ---
+        stage('Deploy to Local Prod') {
+            // Bagian 'when' sudah dihapus agar branch APAPUN bisa di-deploy
             steps {
-                // Mengecek apakah image berhasil dibuat
-                sh "docker images | grep anggota-service"
+                script {
+                    echo "Mendeploy ke port ${HOST_PORT}..."
+                    
+                    // 1. Hapus container lama
+                    sh "docker rm -f ${CONTAINER_NAME} || true"
+                    
+                    // 2. Jalankan container baru
+                    sh """
+                        docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        --restart unless-stopped \
+                        -p ${HOST_PORT}:${CONTAINER_PORT} \
+                        buku-service:${env.BRANCH_NAME}
+                    """
+                }
             }
         }
     }
