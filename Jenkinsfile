@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         CONTAINER_NAME = 'anggota-service-prod'
-        HOST_PORT = '9002'
+        HOST_PORT = '9006'
         CONTAINER_PORT = '8082'
     }
 
