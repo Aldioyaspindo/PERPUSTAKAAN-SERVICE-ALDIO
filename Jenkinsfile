@@ -29,10 +29,6 @@ pipeline {
 
         // --- INI TAMBAHANNYA (CD) ---
         stage('Deploy to Local Prod') {
-            // Hanya deploy jika yang di-push adalah branch 'main'
-            when {
-                branch 'main'
-            }
             steps {
                 script {
                     echo "Mendeploy ke port ${HOST_PORT}..."
