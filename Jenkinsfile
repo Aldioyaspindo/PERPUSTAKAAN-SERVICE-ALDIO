@@ -1,10 +1,18 @@
 pipeline {
     agent any
 
+    environment {
+        // Nama container saat dijalankan nanti
+        CONTAINER_NAME = 'peminjaman-service-prod'
+        // Port di laptop (Host) yang mau dipakai
+        HOST_PORT = '9003'
+        // Port di dalam container (sesuai EXPOSE Dockerfile anda)
+        CONTAINER_PORT = '8083'
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
-                // Mengambil kodingan dari branch saat ini
                 checkout scm
             }
         }
@@ -12,20 +20,36 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo "Membangun image Spring Boot untuk branch: ${env.BRANCH_NAME}"
-                    
-                    // Format nama image: nama-service:nama-branch
-                    // Contoh hasil: buku-service:main atau buku-service:feature-login
-                    // Kita gunakan nama lowercase 'buku-service' agar standar docker
+                    echo "Membangun image untuk branch: ${env.BRANCH_NAME}"
+                    // Kita tag image dengan nama branch
                     sh "docker build -t peminjaman-service:${env.BRANCH_NAME} ."
                 }
             }
         }
 
-        stage('Verifikasi Image') {
+        // --- INI TAMBAHANNYA (CD) ---
+        stage('Deploy to Local Prod') {
+            // Hanya deploy jika yang di-push adalah branch 'main'
+            when {
+                branch 'main'
+            }
             steps {
-                // Mengecek apakah image berhasil dibuat
-                sh "docker images | grep peminjaman-service"
+                script {
+                    echo "Mendeploy ke port ${HOST_PORT}..."
+                    
+                    // 1. Hapus container lama jika ada (biar update)
+                    // "|| true" agar tidak error jika container belum ada
+                    sh "docker rm -f ${CONTAINER_NAME} || true"
+                    
+                    // 2. Jalankan container baru
+                    sh """
+                        docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        --restart unless-stopped \
+                        -p ${HOST_PORT}:${CONTAINER_PORT} \
+                        peminjaman-service:${env.BRANCH_NAME}
+                    """
+                }
             }
         }
     }
