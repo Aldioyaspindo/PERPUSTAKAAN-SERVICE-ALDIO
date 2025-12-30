@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        CONTAINER_NAME = 'buku-service-prod'
+        CONTAINER_NAME = 'buku-service-deploy'
         HOST_PORT = '9001'
         CONTAINER_PORT = '8081'
     }
