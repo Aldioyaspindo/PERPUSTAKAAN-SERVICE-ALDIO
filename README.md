@@ -1,4 +1,4 @@
-# 🚀 Jenkins CI/CD Pipeline for Spring Boot Microservices
+# 🚀 Jenkins CI/CD Pipeline untuk Spring Boot Microservices
 
 <div align="center">
 
@@ -7,83 +7,81 @@
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
 ![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 
-**Automated CI/CD pipeline optimized for low-RAM Windows laptops**
+**Pipeline CI/CD otomatis yang dioptimalkan untuk laptop Windows dengan RAM terbatas**
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [Troubleshooting](#-troubleshooting)
+[Fitur](#-fitur) • [Mulai Cepat](#-mulai-cepat) • [Dokumentasi](#-dokumentasi) • [Pemecahan Masalah](#-pemecahan-masalah)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 📋 Daftar Isi
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Prerequisites](#-prerequisites)
-- [Quick Start](#-quick-start)
-- [Detailed Setup](#-detailed-setup)
-- [Project Structure](#-project-structure)
-- [Usage](#-usage)
-- [Troubleshooting](#-troubleshooting)
-- [Best Practices](#-best-practices)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [Gambaran Umum](#-gambaran-umum)
+- [Fitur](#-fitur)
+- [Prasyarat](#-prasyarat)
+- [Mulai Cepat](#-mulai-cepat)
+- [Pengaturan Lengkap](#-pengaturan-lengkap)
+- [Struktur Proyek](#-struktur-proyek)
+- [Penggunaan](#-penggunaan)
+- [Pemecahan Masalah](#-pemecahan-masalah)
+- [Praktik Terbaik](#-praktik-terbaik)
 
 ---
 
-## 🎯 Overview
+## 🎯 Gambaran Umum
 
-This repository provides a complete guide for setting up a Jenkins CI/CD pipeline running in Docker on Windows, specifically optimized for laptops with limited RAM (4GB+). The pipeline automates the build and deployment process for Spring Boot microservices.
+Repositori ini menyediakan panduan lengkap untuk mengatur pipeline Jenkins CI/CD yang berjalan di Docker pada Windows, khususnya dioptimalkan untuk laptop dengan RAM terbatas (4GB+). Pipeline ini mengotomatiskan proses build dan deployment untuk microservices Spring Boot.
 
-### Why This Setup?
+### Mengapa Menggunakan Pengaturan Ini?
 
-- **💾 Memory Efficient**: WSL2 memory limiting prevents system hangs
-- **🐳 Docker-in-Docker**: Jenkins can build Docker images natively
-- **📦 Multi-Stage Builds**: Final images under 200MB
-- **🔄 Multi-Branch Support**: Automatic deployment for dev, staging, and production branches
-- **⚡ Fast Builds**: Maven dependency caching reduces build times by 70%
-
----
-
-## ✨ Features
-
-- ✅ **Automated Docker image building** for each microservice
-- ✅ **Multi-branch pipeline** support (automatic detection)
-- ✅ **Memory-optimized** configuration for low-spec machines
-- ✅ **Multi-stage Docker builds** for minimal image sizes
-- ✅ **Automatic container deployment** after successful builds
-- ✅ **GitHub integration** with webhook support
-- ✅ **Build status tracking** and console logging
-- ✅ **Persistent configuration** across container restarts
+- **💾 Efisien Memori**: Pembatasan memori WSL2 mencegah sistem hang
+- **🐳 Docker-in-Docker**: Jenkins dapat membangun image Docker secara native
+- **📦 Multi-Stage Builds**: Image akhir di bawah 200MB
+- **🔄 Dukungan Multi-Branch**: Deployment otomatis untuk branch dev, staging, dan production
+- **⚡ Build Cepat**: Caching dependency Maven mengurangi waktu build hingga 70%
 
 ---
 
-## 🔧 Prerequisites
+## ✨ Fitur
 
-### Software Requirements
+- ✅ **Pembuatan image Docker otomatis** untuk setiap microservice
+- ✅ **Dukungan pipeline multi-branch** (deteksi otomatis)
+- ✅ **Konfigurasi yang dioptimalkan memori** untuk mesin spesifikasi rendah
+- ✅ **Multi-stage Docker builds** untuk ukuran image minimal
+- ✅ **Deployment container otomatis** setelah build berhasil
+- ✅ **Integrasi GitHub** dengan dukungan webhook
+- ✅ **Pelacakan status build** dan pencatatan console
+- ✅ **Konfigurasi persisten** lintas restart container
 
-| Tool | Version | Purpose |
+---
+
+## 🔧 Prasyarat
+
+### Kebutuhan Perangkat Lunak
+
+| Alat | Versi | Tujuan |
 |------|---------|---------|
-| **Windows** | 10/11 | Host OS |
-| **WSL 2** | Latest | Docker backend |
-| **Docker Desktop** | 4.0+ | Container runtime |
-| **Git** | 2.0+ | Version control |
+| **Windows** | 10/11 | Sistem operasi host |
+| **WSL 2** | Terbaru | Backend Docker |
+| **Docker Desktop** | 4.0+ | Runtime container |
+| **Git** | 2.0+ | Kontrol versi |
 
-### Hardware Requirements
+### Kebutuhan Perangkat Keras
 
-| Component | Minimum | Recommended |
+| Komponen | Minimum | Direkomendasikan |
 |-----------|---------|-------------|
 | **RAM** | 4GB | 8GB+ |
-| **Storage** | 10GB free | 20GB+ free |
-| **CPU** | 2 cores | 4 cores |
+| **Penyimpanan** | 10GB tersedia | 20GB+ tersedia |
+| **CPU** | 2 core | 4 core |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Mulai Cepat
 
-### 1. Limit WSL2 Memory
+### 1. Batasi Memori WSL2
 
-Create `C:\Users\[YourName]\.wslconfig`:
+Buat berkas `C:\Users\[NamaAnda]\.wslconfig`:
 
 ```toml
 [wsl2]
@@ -97,14 +95,14 @@ Restart WSL:
 wsl --shutdown
 ```
 
-### 2. Build Custom Jenkins Image
+### 2. Bangun Image Jenkins Kustom
 
 ```powershell
 mkdir C:\jenkins-setup
 cd C:\jenkins-setup
 ```
 
-Create `Dockerfile`:
+Buat berkas `Dockerfile`:
 
 ```dockerfile
 FROM jenkins/jenkins:lts
@@ -120,7 +118,7 @@ RUN apt-get update && \
 USER jenkins
 ```
 
-Build and run:
+Bangun dan jalankan:
 
 ```powershell
 docker build -t jenkins-docker-windows .
@@ -137,25 +135,25 @@ docker run -d `
   jenkins-docker-windows
 ```
 
-### 3. Access Jenkins
+### 3. Akses Jenkins
 
-Open browser at `http://localhost:8080`
+Buka browser di `http://localhost:8080`
 
-Get initial password:
+Dapatkan kata sandi awal:
 
 ```powershell
 docker exec jenkins-server cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-### 4. Configure Jenkins
+### 4. Konfigurasi Jenkins
 
-1. Install minimal plugins: **Git**, **Pipeline**, **Docker Pipeline**
-2. Set executors to **1** (Manage Jenkins → Nodes → Built-In Node)
-3. Add GitHub credentials (Manage Jenkins → Credentials)
+1. Pasang plugin minimal: **Git**, **Pipeline**, **Docker Pipeline**
+2. Atur executor menjadi **1** (Manage Jenkins → Nodes → Built-In Node)
+3. Tambahkan kredensial GitHub (Manage Jenkins → Credentials)
 
-### 5. Setup Your Microservice
+### 5. Atur Microservice Anda
 
-Add to each service root:
+Tambahkan ke root setiap service:
 
 **`Dockerfile`**:
 
@@ -213,26 +211,26 @@ pipeline {
 }
 ```
 
-### 6. Create Pipeline Job
+### 6. Buat Job Pipeline
 
-1. Jenkins Dashboard → **New Item**
-2. Select **Multibranch Pipeline**
-3. Configure Git repository and credentials
-4. Save and watch Jenkins auto-detect branches!
+1. Dashboard Jenkins → **New Item**
+2. Pilih **Multibranch Pipeline**
+3. Konfigurasi repositori Git dan kredensial
+4. Simpan dan lihat Jenkins mendeteksi branch secara otomatis!
 
 ---
 
-## 📂 Project Structure
+## 📂 Struktur Proyek
 
 ```
-your-repository/
+repositori-anda/
 ├── service-user/
 │   ├── src/
 │   │   └── main/
 │   │       └── java/
 │   ├── pom.xml
-│   ├── Dockerfile          ← Multi-stage build
-│   └── Jenkinsfile         ← Pipeline definition
+│   ├── Dockerfile          ← Build multi-stage
+│   └── Jenkinsfile         ← Definisi pipeline
 ├── service-product/
 │   ├── src/
 │   ├── pom.xml
@@ -245,45 +243,45 @@ your-repository/
 
 ---
 
-## 💻 Usage
+## 💻 Penggunaan
 
-### Trigger Build Manually
+### Memicu Build Secara Manual
 
-1. Go to Jenkins Dashboard
-2. Select your pipeline
-3. Choose branch → **Build Now**
+1. Buka Dashboard Jenkins
+2. Pilih pipeline Anda
+3. Pilih branch → **Build Now**
 
-### Automatic Builds
+### Build Otomatis
 
-Configure GitHub webhook:
+Konfigurasi webhook GitHub:
 
-1. GitHub repo → Settings → Webhooks
-2. Add webhook: `http://your-jenkins-url:8080/github-webhook/`
-3. Push code → Jenkins auto-builds!
+1. Repositori GitHub → Settings → Webhooks
+2. Tambahkan webhook: `http://url-jenkins-anda:8080/github-webhook/`
+3. Push kode → Jenkins akan build otomatis!
 
-### View Build Status
+### Melihat Status Build
 
-- **Blue** = Build in progress
-- **Green** = Build successful ✅
-- **Red** = Build failed ❌
+- **Biru** = Build sedang berjalan
+- **Hijau** = Build berhasil ✅
+- **Merah** = Build gagal ❌
 
-Click build number → **Console Output** for detailed logs.
+Klik nomor build → **Console Output** untuk log detail.
 
 ---
 
-## 🛠️ Troubleshooting
+## 🛠️ Pemecahan Masalah
 
 <details>
-<summary><b>🔴 Jenkins UI Loading Forever</b></summary>
+<summary><b>🔴 UI Jenkins Terus Loading</b></summary>
 
 ```powershell
 docker restart jenkins-server
-# Wait 60 seconds, then refresh browser
+# Tunggu 60 detik, lalu muat ulang browser
 ```
 </details>
 
 <details>
-<summary><b>🔴 Permission Denied on Docker Socket</b></summary>
+<summary><b>🔴 Permission Denied pada Docker Socket</b></summary>
 
 ```powershell
 docker exec -u 0 -it jenkins-server chmod 666 /var/run/docker.sock
@@ -291,146 +289,116 @@ docker exec -u 0 -it jenkins-server chmod 666 /var/run/docker.sock
 </details>
 
 <details>
-<summary><b>🔴 Build Failed: "openjdk not found"</b></summary>
+<summary><b>🔴 Build Gagal: "openjdk not found"</b></summary>
 
-Use correct base image:
+Gunakan base image yang benar:
 ```dockerfile
 FROM eclipse-temurin:17-jre-alpine
 ```
 </details>
 
 <details>
-<summary><b>🔴 Laptop Hangs During Build</b></summary>
+<summary><b>🔴 Laptop Hang Saat Build</b></summary>
 
-1. Reduce WSL memory in `.wslconfig`:
+1. Kurangi memori WSL di `.wslconfig`:
    ```toml
    memory=3GB
    ```
-2. Update Jenkins memory:
+2. Perbarui memori Jenkins:
    ```powershell
    docker update jenkins-server --memory="768m"
    docker restart jenkins-server
    ```
-3. Ensure executors = 1
+3. Pastikan executor = 1
 </details>
 
 <details>
-<summary><b>🔴 Port Already in Use</b></summary>
+<summary><b>🔴 Port Sudah Digunakan</b></summary>
 
 ```powershell
-docker stop <old-container-name>
-docker rm <old-container-name>
+docker stop <nama-container-lama>
+docker rm <nama-container-lama>
 ```
 </details>
 
-### Full Troubleshooting Guide
+---
 
-See [Troubleshooting Section](#-tahap-6-troubleshooting--solusi-masalah) in documentation.
+## 📚 Pengaturan Lengkap
+
+Untuk panduan langkah demi langkah lengkap termasuk:
+
+- Detail konfigurasi WSL2
+- Penjelasan Dockerfile kustom
+- Manajemen plugin Jenkins
+- Pengaturan token GitHub
+- Konfigurasi pipeline lanjutan
+
+Lihat [dokumentasi lengkap](docs/SETUP_GUIDE.md).
 
 ---
 
-## 📚 Detailed Setup
+## 🎓 Praktik Terbaik
 
-For complete step-by-step guide including:
+### Manajemen Memori
 
-- WSL2 configuration details
-- Custom Dockerfile explanations
-- Jenkins plugin management
-- GitHub token setup
-- Advanced pipeline configurations
+- Tutup aplikasi yang tidak perlu saat build
+- Build satu service pada satu waktu
+- Jalankan `docker system prune -a` setiap minggu
+- Pantau RAM di Task Manager → Performance → WSL
 
-See the [full documentation](docs/SETUP_GUIDE.md).
-
----
-
-## 🎓 Best Practices
-
-### Memory Management
-
-- Close unnecessary apps during builds
-- Build one service at a time
-- Run `docker system prune -a` weekly
-- Monitor RAM in Task Manager → Performance → WSL
-
-### Development Workflow
+### Alur Kerja Pengembangan
 
 ```
 feature-branch → dev → staging → main (production)
 ```
 
-- Test in `dev` branch first
-- Use semantic versioning for images: `service:v1.0.0`
-- Tag production releases
+- Uji di branch `dev` terlebih dahulu
+- Gunakan semantic versioning untuk image: `service:v1.0.0`
+- Tag rilis production
 
-### Maintenance Routine
+### Rutinitas Pemeliharaan
 
-- **Weekly**: Clean Docker cache
-- **Biweekly**: Restart Jenkins container
-- **Monthly**: Backup `jenkins_home` volume
-- **Quarterly**: Update Jenkins LTS version
-
----
-
-## 🔒 Security Notes
-
-- Jenkins is exposed on `localhost:8080` by default (not public)
-- For production, use HTTPS and proper authentication
-- Keep GitHub tokens secure (never commit to repo)
-- Use Jenkins credentials store for sensitive data
+- **Mingguan**: Bersihkan cache Docker
+- **Dua Mingguan**: Restart container Jenkins
+- **Bulanan**: Cadangkan volume `jenkins_home`
+- **Kuartalan**: Perbarui versi Jenkins LTS
 
 ---
 
-## 📊 Performance Benchmarks
+## 🔒 Catatan Keamanan
 
-| Metric | Before Optimization | After Optimization |
+- Jenkins terekspos di `localhost:8080` secara bawaan (tidak publik)
+- Untuk production, gunakan HTTPS dan otentikasi yang tepat
+- Jaga keamanan token GitHub (jangan pernah commit ke repositori)
+- Gunakan penyimpanan kredensial Jenkins untuk data sensitif
+
+---
+
+## 📊 Tolok Ukur Performa
+
+| Metrik | Sebelum Optimasi | Setelah Optimasi |
 |--------|-------------------|-------------------|
-| Build Time | ~8 minutes | ~3 minutes |
-| Image Size | 550MB | 180MB |
-| RAM Usage | Unlimited (8GB+) | Limited (1GB) |
-| Laptop Hangs | Frequent | Never |
+| Waktu Build | ~8 menit | ~3 menit |
+| Ukuran Image | 550MB | 180MB |
+| Penggunaan RAM | Tidak terbatas (8GB+) | Terbatas (1GB) |
+| Laptop Hang | Sering | Tidak pernah |
 
 ---
 
-## 🤝 Contributing
+## 🙏 Penghargaan
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [Jenkins Official Documentation](https://www.jenkins.io/doc/)
-- [Docker Documentation](https://docs.docker.com/)
-- [Spring Boot Docker Guide](https://spring.io/guides/topicals/spring-boot-docker/)
-
----
-
-## 📞 Support
-
-- 📫 Issues: [GitHub Issues](../../issues)
-- 💬 Discussions: [GitHub Discussions](../../discussions)
-- 📖 Wiki: [Project Wiki](../../wiki)
+- [Dokumentasi Resmi Jenkins](https://www.jenkins.io/doc/)
+- [Dokumentasi Docker](https://docs.docker.com/)
+- [Panduan Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
 
 ---
 
 <div align="center">
 
-**⭐ Star this repo if it helped you!**
+**⭐ Beri bintang repositori ini jika membantu Anda!**
 
-Made with ❤️ for developers with limited resources
+Dibuat dengan ❤️ untuk pengembang dengan sumber daya terbatas
 
-*Last updated: December 2024*
+*Terakhir diperbarui: Desember 2024*
 
 </div>
