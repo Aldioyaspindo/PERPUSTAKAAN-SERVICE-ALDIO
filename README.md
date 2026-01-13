@@ -1,404 +1,290 @@
-# 🚀 Jenkins CI/CD Pipeline untuk Spring Boot Microservices
+# 🚀 Jenkins Multibranch Pipeline - Panduan Sederhana
 
-<div align="center">
+## 📋 Apa itu Multibranch Pipeline?
 
-![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
-![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+Multibranch Pipeline adalah fitur Jenkins yang **otomatis mendeteksi semua branch** di repository Git Anda dan membuat pipeline terpisah untuk setiap branch. Setiap kali Anda membuat branch baru atau push perubahan, Jenkins akan langsung mendeteksi dan menjalankan build.
 
-**Pipeline CI/CD otomatis yang dioptimalkan untuk laptop Windows dengan RAM terbatas**
-
-[Fitur](#-fitur) • [Mulai Cepat](#-mulai-cepat) • [Dokumentasi](#-dokumentasi) • [Pemecahan Masalah](#-pemecahan-masalah)
-
-</div>
-
----
-
-## 📋 Daftar Isi
-
-- [Gambaran Umum](#-gambaran-umum)
-- [Fitur](#-fitur)
-- [Prasyarat](#-prasyarat)
-- [Mulai Cepat](#-mulai-cepat)
-- [Pengaturan Lengkap](#-pengaturan-lengkap)
-- [Struktur Proyek](#-struktur-proyek)
-- [Penggunaan](#-penggunaan)
-- [Pemecahan Masalah](#-pemecahan-masalah)
-- [Praktik Terbaik](#-praktik-terbaik)
-
----
-
-## 🎯 Gambaran Umum
-
-Repositori ini menyediakan panduan lengkap untuk mengatur pipeline Jenkins CI/CD yang berjalan di Docker pada Windows, khususnya dioptimalkan untuk laptop dengan RAM terbatas (4GB+). Pipeline ini mengotomatiskan proses build dan deployment untuk microservices Spring Boot.
-
-### Mengapa Menggunakan Pengaturan Ini?
-
-- **💾 Efisien Memori**: Pembatasan memori WSL2 mencegah sistem hang
-- **🐳 Docker-in-Docker**: Jenkins dapat membangun image Docker secara native
-- **📦 Multi-Stage Builds**: Image akhir di bawah 200MB
-- **🔄 Dukungan Multi-Branch**: Deployment otomatis untuk branch dev, staging, dan production
-- **⚡ Build Cepat**: Caching dependency Maven mengurangi waktu build hingga 70%
-
----
-
-## ✨ Fitur
-
-- ✅ **Pembuatan image Docker otomatis** untuk setiap microservice
-- ✅ **Dukungan pipeline multi-branch** (deteksi otomatis)
-- ✅ **Konfigurasi yang dioptimalkan memori** untuk mesin spesifikasi rendah
-- ✅ **Multi-stage Docker builds** untuk ukuran image minimal
-- ✅ **Deployment container otomatis** setelah build berhasil
-- ✅ **Integrasi GitHub** dengan dukungan webhook
-- ✅ **Pelacakan status build** dan pencatatan console
-- ✅ **Konfigurasi persisten** lintas restart container
+### Keuntungan:
+- ✅ Deteksi branch otomatis
+- ✅ Build terpisah untuk setiap branch
+- ✅ Cocok untuk workflow: dev → staging → production
+- ✅ Tidak perlu konfigurasi manual per branch
 
 ---
 
 ## 🔧 Prasyarat
 
-### Kebutuhan Perangkat Lunak
-
-| Alat | Versi | Tujuan |
-|------|---------|---------|
-| **Windows** | 10/11 | Sistem operasi host |
-| **WSL 2** | Terbaru | Backend Docker |
-| **Docker Desktop** | 4.0+ | Runtime container |
-| **Git** | 2.0+ | Kontrol versi |
-
-### Kebutuhan Perangkat Keras
-
-| Komponen | Minimum | Direkomendasikan |
-|-----------|---------|-------------|
-| **RAM** | 4GB | 8GB+ |
-| **Penyimpanan** | 10GB tersedia | 20GB+ tersedia |
-| **CPU** | 2 core | 4 core |
+- ✅ Jenkins sudah terinstall dan berjalan
+- ✅ Repository Git dengan akses (GitHub/GitLab/Bitbucket)
+- ✅ Plugin Jenkins: **Pipeline**, **Git**, **GitHub** (atau sesuai platform Anda)
 
 ---
 
-## 🚀 Mulai Cepat
+## 📝 Langkah 1: Buat Jenkinsfile
 
-### 1. Batasi Memori WSL2
-
-Buat berkas `C:\Users\[NamaAnda]\.wslconfig`:
-
-```toml
-[wsl2]
-memory=4GB
-processors=2
-```
-
-Restart WSL:
-
-```powershell
-wsl --shutdown
-```
-
-### 2. Bangun Image Jenkins Kustom
-
-```powershell
-mkdir C:\jenkins-setup
-cd C:\jenkins-setup
-```
-
-Buat berkas `Dockerfile`:
-
-```dockerfile
-FROM jenkins/jenkins:lts
-USER root
-
-RUN apt-get update && \
-    apt-get install -y lsb-release && \
-    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y docker-ce-cli
-
-USER jenkins
-```
-
-Bangun dan jalankan:
-
-```powershell
-docker build -t jenkins-docker-windows .
-
-docker run -d `
-  --name jenkins-server `
-  -u root `
-  -p 8080:8080 -p 50000:50000 `
-  -v //var/run/docker.sock:/var/run/docker.sock `
-  -v jenkins_home:/var/jenkins_home `
-  --memory="1g" `
-  --cpus="1.0" `
-  --restart=on-failure `
-  jenkins-docker-windows
-```
-
-### 3. Akses Jenkins
-
-Buka browser di `http://localhost:8080`
-
-Dapatkan kata sandi awal:
-
-```powershell
-docker exec jenkins-server cat /var/jenkins_home/secrets/initialAdminPassword
-```
-
-### 4. Konfigurasi Jenkins
-
-1. Pasang plugin minimal: **Git**, **Pipeline**, **Docker Pipeline**
-2. Atur executor menjadi **1** (Manage Jenkins → Nodes → Built-In Node)
-3. Tambahkan kredensial GitHub (Manage Jenkins → Credentials)
-
-### 5. Atur Microservice Anda
-
-Tambahkan ke root setiap service:
-
-**`Dockerfile`**:
-
-```dockerfile
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS builder
-WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-COPY src ./src
-RUN mvn clean package -DskipTests
-
-FROM eclipse-temurin:17-jre-alpine
-WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
-EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-**`Jenkinsfile`**:
+Di **root directory** setiap microservice, buat file bernama `Jenkinsfile`:
 
 ```groovy
 pipeline {
     agent any
+    
     environment {
-        CONTAINER_NAME = 'my-service-prod'
-        HOST_PORT = '9001'
-        CONTAINER_PORT = '8081'
+        SERVICE_NAME = 'user-service'
+        DOCKER_IMAGE = "${SERVICE_NAME}:${env.BRANCH_NAME}"
     }
+    
     stages {
         stage('Checkout') {
-            steps { checkout scm }
+            steps {
+                echo "Building branch: ${env.BRANCH_NAME}"
+                checkout scm
+            }
         }
-        stage('Build Image') {
+        
+        stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t my-service:${env.BRANCH_NAME} ."
+                    sh "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
         }
-        stage('Deploy') {
+        
+        stage('Deploy to Dev') {
+            when {
+                branch 'dev'
+            }
             steps {
                 script {
-                    sh "docker rm -f ${CONTAINER_NAME} || true"
+                    sh "docker rm -f ${SERVICE_NAME}-dev || true"
                     sh """
                         docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        --restart unless-stopped \
-                        -p ${HOST_PORT}:${CONTAINER_PORT} \
-                        my-service:${env.BRANCH_NAME}
+                        --name ${SERVICE_NAME}-dev \
+                        -p 8081:8081 \
+                        ${DOCKER_IMAGE}
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            when {
+                branch 'staging'
+            }
+            steps {
+                script {
+                    sh "docker rm -f ${SERVICE_NAME}-staging || true"
+                    sh """
+                        docker run -d \
+                        --name ${SERVICE_NAME}-staging \
+                        -p 8082:8081 \
+                        ${DOCKER_IMAGE}
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                input message: 'Deploy ke Production?', ok: 'Deploy!'
+                script {
+                    sh "docker rm -f ${SERVICE_NAME}-prod || true"
+                    sh """
+                        docker run -d \
+                        --name ${SERVICE_NAME}-prod \
+                        -p 8080:8081 \
+                        ${DOCKER_IMAGE}
                     """
                 }
             }
         }
     }
+    
+    post {
+        success {
+            echo '✅ Build berhasil!'
+        }
+        failure {
+            echo '❌ Build gagal!'
+        }
+    }
 }
 ```
 
-### 6. Buat Job Pipeline
+**Push Jenkinsfile ke repository Anda!**
+
+---
+
+## 🔑 Langkah 2: Tambahkan Credentials di Jenkins
+
+1. Buka Jenkins Dashboard
+2. **Manage Jenkins** → **Manage Credentials**
+3. Klik **(global)** → **Add Credentials**
+4. Isi form:
+   - **Kind**: Username with password
+   - **Username**: Username GitHub/GitLab Anda
+   - **Password**: Personal Access Token (buat di GitHub Settings → Developer settings → Personal access tokens)
+   - **ID**: `github-credentials` (atau nama lain yang mudah diingat)
+   - **Description**: GitHub Access Token
+5. Klik **Create**
+
+---
+
+## 🎯 Langkah 3: Buat Multibranch Pipeline Job
+
+### 3.1 Buat Job Baru
 
 1. Dashboard Jenkins → **New Item**
-2. Pilih **Multibranch Pipeline**
-3. Konfigurasi repositori Git dan kredensial
-4. Simpan dan lihat Jenkins mendeteksi branch secara otomatis!
+2. Masukkan nama: `user-service-pipeline` (atau nama service Anda)
+3. Pilih: **Multibranch Pipeline**
+4. Klik **OK**
+
+### 3.2 Konfigurasi Branch Sources
+
+Di halaman konfigurasi:
+
+**A. Tambahkan Source:**
+- Scroll ke **Branch Sources**
+- Klik **Add source** → **Git**
+
+**B. Isi Konfigurasi Git:**
+- **Project Repository**: `https://github.com/username/repository.git`
+- **Credentials**: Pilih credentials yang tadi dibuat (`github-credentials`)
+
+**C. Konfigurasi Behaviors (Opsional):**
+- Klik **Add** di Behaviors
+- Pilih **Filter by name (with wildcards)**
+  - Include: `main dev staging feature/*`
+  - Exclude: *(kosongkan)*
+
+### 3.3 Build Configuration
+
+- **Mode**: by Jenkinsfile
+- **Script Path**: `Jenkinsfile`
+
+### 3.4 Scan Multibranch Pipeline Triggers
+
+- Centang: **Periodically if not otherwise run**
+- Interval: **1 hour** (atau sesuai kebutuhan)
+
+### 3.5 Orphaned Item Strategy
+
+- **Days to keep old items**: 7
+- **Max # of old items to keep**: 10
+
+Klik **Save**!
 
 ---
 
-## 📂 Struktur Proyek
+## 🚀 Langkah 4: Scan Repository
+
+Setelah save, Jenkins akan otomatis scan pertama kali.
+
+Atau manual:
+1. Klik nama job Anda
+2. Klik **Scan Multibranch Pipeline Now**
+3. Jenkins akan mendeteksi semua branch yang punya Jenkinsfile
+4. Build otomatis dimulai! 🎉
+
+---
+
+## 🔔 Langkah 5: Setup Webhook (Opsional tapi Direkomendasikan)
+
+Agar Jenkins langsung build saat ada push, setup webhook:
+
+### Untuk GitHub:
+
+1. Buka repository di GitHub
+2. **Settings** → **Webhooks** → **Add webhook**
+3. **Payload URL**: `http://your-jenkins-url:8080/github-webhook/`
+4. **Content type**: `application/json`
+5. **Which events**: Just the push event
+6. Klik **Add webhook**
+
+### Untuk GitLab:
+
+1. Repository → **Settings** → **Webhooks**
+2. **URL**: `http://your-jenkins-url:8080/project/user-service-pipeline`
+3. **Trigger**: Push events, Merge request events
+4. Klik **Add webhook**
+
+---
+
+## 📊 Struktur Branch yang Disarankan
 
 ```
-repositori-anda/
-├── service-user/
-│   ├── src/
-│   │   └── main/
-│   │       └── java/
-│   ├── pom.xml
-│   ├── Dockerfile          ← Build multi-stage
-│   └── Jenkinsfile         ← Definisi pipeline
-├── service-product/
-│   ├── src/
-│   ├── pom.xml
-│   ├── Dockerfile
-│   └── Jenkinsfile
-├── service-order/
-│   └── ...
-└── README.md
+repository/
+├── main           → Production (port 8080)
+├── staging        → Staging (port 8082)
+├── dev            → Development (port 8081)
+└── feature/login  → Testing (tidak auto-deploy)
 ```
 
 ---
 
-## 💻 Penggunaan
+## 💡 Cara Kerja
 
-### Memicu Build Secara Manual
-
-1. Buka Dashboard Jenkins
-2. Pilih pipeline Anda
-3. Pilih branch → **Build Now**
-
-### Build Otomatis
-
-Konfigurasi webhook GitHub:
-
-1. Repositori GitHub → Settings → Webhooks
-2. Tambahkan webhook: `http://url-jenkins-anda:8080/github-webhook/`
-3. Push kode → Jenkins akan build otomatis!
-
-### Melihat Status Build
-
-- **Biru** = Build sedang berjalan
-- **Hijau** = Build berhasil ✅
-- **Merah** = Build gagal ❌
-
-Klik nomor build → **Console Output** untuk log detail.
+1. **Push ke branch `dev`** → Build otomatis → Deploy ke container dev (port 8081)
+2. **Push ke branch `staging`** → Build otomatis → Deploy ke container staging (port 8082)
+3. **Push ke branch `main`** → Build otomatis → **Minta konfirmasi** → Deploy ke production (port 8080)
+4. **Branch lain** → Build saja, tidak deploy
 
 ---
 
-## 🛠️ Pemecahan Masalah
+## 🎨 Customize untuk Service Anda
 
-<details>
-<summary><b>🔴 UI Jenkins Terus Loading</b></summary>
+Edit bagian ini di Jenkinsfile:
 
-```powershell
-docker restart jenkins-server
-# Tunggu 60 detik, lalu muat ulang browser
+```groovy
+environment {
+    SERVICE_NAME = 'product-service'  // ← Ganti nama service
+    DOCKER_IMAGE = "${SERVICE_NAME}:${env.BRANCH_NAME}"
+}
 ```
-</details>
 
-<details>
-<summary><b>🔴 Permission Denied pada Docker Socket</b></summary>
+Dan sesuaikan port di stage Deploy:
 
-```powershell
-docker exec -u 0 -it jenkins-server chmod 666 /var/run/docker.sock
+```groovy
+-p 9001:8081  // ← Port host:container
 ```
-</details>
-
-<details>
-<summary><b>🔴 Build Gagal: "openjdk not found"</b></summary>
-
-Gunakan base image yang benar:
-```dockerfile
-FROM eclipse-temurin:17-jre-alpine
-```
-</details>
-
-<details>
-<summary><b>🔴 Laptop Hang Saat Build</b></summary>
-
-1. Kurangi memori WSL di `.wslconfig`:
-   ```toml
-   memory=3GB
-   ```
-2. Perbarui memori Jenkins:
-   ```powershell
-   docker update jenkins-server --memory="768m"
-   docker restart jenkins-server
-   ```
-3. Pastikan executor = 1
-</details>
-
-<details>
-<summary><b>🔴 Port Sudah Digunakan</b></summary>
-
-```powershell
-docker stop <nama-container-lama>
-docker rm <nama-container-lama>
-```
-</details>
 
 ---
 
-## 📚 Pengaturan Lengkap
+## ✅ Checklist Setup
 
-Untuk panduan langkah demi langkah lengkap termasuk:
-
-- Detail konfigurasi WSL2
-- Penjelasan Dockerfile kustom
-- Manajemen plugin Jenkins
-- Pengaturan token GitHub
-- Konfigurasi pipeline lanjutan
-
-Lihat [dokumentasi lengkap](docs/SETUP_GUIDE.md).
+- [ ] Jenkinsfile sudah dibuat di root repository
+- [ ] Credentials GitHub/GitLab sudah ditambahkan di Jenkins
+- [ ] Multibranch Pipeline job sudah dibuat
+- [ ] Repository berhasil di-scan
+- [ ] Build pertama berhasil
+- [ ] Webhook sudah dikonfigurasi (opsional)
 
 ---
 
-## 🎓 Praktik Terbaik
+## 🛠️ Troubleshooting Cepat
 
-### Manajemen Memori
-
-- Tutup aplikasi yang tidak perlu saat build
-- Build satu service pada satu waktu
-- Jalankan `docker system prune -a` setiap minggu
-- Pantau RAM di Task Manager → Performance → WSL
-
-### Alur Kerja Pengembangan
-
-```
-feature-branch → dev → staging → main (production)
-```
-
-- Uji di branch `dev` terlebih dahulu
-- Gunakan semantic versioning untuk image: `service:v1.0.0`
-- Tag rilis production
-
-### Rutinitas Pemeliharaan
-
-- **Mingguan**: Bersihkan cache Docker
-- **Dua Mingguan**: Restart container Jenkins
-- **Bulanan**: Cadangkan volume `jenkins_home`
-- **Kuartalan**: Perbarui versi Jenkins LTS
+| Masalah | Solusi |
+|---------|--------|
+| Branch tidak terdeteksi | Pastikan Jenkinsfile ada di root branch tersebut |
+| Build gagal "docker not found" | Pastikan Docker CLI terinstall di Jenkins |
+| Webhook tidak jalan | Cek firewall, pastikan Jenkins bisa diakses dari internet |
+| Port sudah digunakan | Hentikan container lama: `docker rm -f nama-container` |
 
 ---
 
-## 🔒 Catatan Keamanan
+## 📚 Referensi
 
-- Jenkins terekspos di `localhost:8080` secara bawaan (tidak publik)
-- Untuk production, gunakan HTTPS dan otentikasi yang tepat
-- Jaga keamanan token GitHub (jangan pernah commit ke repositori)
-- Gunakan penyimpanan kredensial Jenkins untuk data sensitif
-
----
-
-## 📊 Tolok Ukur Performa
-
-| Metrik | Sebelum Optimasi | Setelah Optimasi |
-|--------|-------------------|-------------------|
-| Waktu Build | ~8 menit | ~3 menit |
-| Ukuran Image | 550MB | 180MB |
-| Penggunaan RAM | Tidak terbatas (8GB+) | Terbatas (1GB) |
-| Laptop Hang | Sering | Tidak pernah |
-
----
-
-## 🙏 Penghargaan
-
-- [Dokumentasi Resmi Jenkins](https://www.jenkins.io/doc/)
-- [Dokumentasi Docker](https://docs.docker.com/)
-- [Panduan Spring Boot Docker](https://spring.io/guides/topicals/spring-boot-docker/)
+- [Jenkins Multibranch Pipeline Docs](https://www.jenkins.io/doc/book/pipeline/multibranch/)
+- [Jenkinsfile Syntax](https://www.jenkins.io/doc/book/pipeline/syntax/)
 
 ---
 
 <div align="center">
 
-**⭐ Beri bintang repositori ini jika membantu Anda!**
+**Selamat! Pipeline Multibranch Anda sudah siap! 🎉**
 
-Dibuat dengan ❤️ untuk pengembang dengan sumber daya terbatas
-
-*Terakhir diperbarui: Desember 2024*
+*Push kode ke branch mana saja dan lihat magic-nya terjadi!*
 
 </div>
