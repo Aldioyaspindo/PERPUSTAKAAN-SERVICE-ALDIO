@@ -255,9 +255,9 @@ import lombok.NoArgsConstructor;
 public class Anggota {
     private Long id;
     private String nama;
-    private String email;
-    private String telepon;
+    private String nim;
     private String alamat;
+    private String jenis_kelamin;
 }
 ```
 
@@ -640,10 +640,10 @@ GET /api/pengembalian/1/details
   },
   "anggota": {
     "id": 1,
-    "nama": "Budi Santoso",
-    "email": "budi@email.com",
-    "telepon": "08123456789",
-    "alamat": "Jakarta"
+    "nama": "Aldio Yaspindo",
+    "nim": "2311081025",
+    "alamat": "Padang"
+    "jenis_kelamin": LK,
   }
 }
 ```
