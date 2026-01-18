@@ -14,6 +14,5 @@ public class Pengembalian {
     private String tanggal_dikembalikan;
     private String terlambat;
     private String denda;
-
     private Long peminjamanId;
 }
