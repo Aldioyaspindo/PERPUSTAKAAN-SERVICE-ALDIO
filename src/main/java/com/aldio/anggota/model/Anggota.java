@@ -9,9 +9,7 @@ import lombok.Data;
 public class Anggota{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
-
     private String nim;
     private String nama;
     private String alamat;

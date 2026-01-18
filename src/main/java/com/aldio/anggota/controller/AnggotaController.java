@@ -4,43 +4,48 @@ import com.aldio.anggota.model.Anggota;
 import com.aldio.anggota.service.AnggotaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import  java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/anggota")
 public class AnggotaController {
     @Autowired
     private AnggotaService anggotaService;
 
-    // route untuk create data
     @PostMapping
-    public Anggota createAnggota(@RequestBody Anggota anggota){
-        return anggotaService.saveAnggota(anggota);
+    public ResponseEntity<Anggota> createAnggota(@RequestBody Anggota anggota){
+        log.info("Membuat anggota baru: {}", anggota);
+        return ResponseEntity.ok(anggotaService.saveAnggota(anggota));
     }
     
-    // route untuk membaca semua data pada database
     @GetMapping
-    public List<Anggota> getAllAnggotas(){
-        return anggotaService.getAllAnggotas();
+    public ResponseEntity<List<Anggota>> getAllAnggotas(){
+        log.info("Mengambil semua anggota");
+        return ResponseEntity.ok(anggotaService.getAllAnggotas());
     } 
 
-    // route untuk membaca data per id
+    
     @GetMapping("/{id}")
-    public Anggota getAnggotaById(@PathVariable Long id){
-        return anggotaService.getAnggotaById(id);
+    public ResponseEntity<Anggota> getAnggotaById(@PathVariable Long id){
+        log.info("Mencari anggota dengan id: {}", id);
+        return ResponseEntity.ok(anggotaService.getAnggotaById(id));
     }
 
-    // route untuk mengupdate data
     @PutMapping("/{id}")
-    public Anggota updateAnggota(@PathVariable Long id, @RequestBody Anggota AnggotaDetails){
-        return anggotaService.updateAnggota(id, AnggotaDetails);
+    public ResponseEntity<Anggota> updateAnggota(@PathVariable Long id, @RequestBody Anggota anggota){
+        log.info("Mengupdate anggota dengan id: {}", id);
+        return ResponseEntity.ok(anggotaService.updateAnggota(id, anggota));
     }
 
-    // route untuk menghapus data anggota
+
     @DeleteMapping("/{id}")
-    public String deleteAnggota(Long id){
-        return anggotaService.deleAnggota(id);
+    public ResponseEntity<String> deleteAnggota(Long id){
+        log.info("Menghapus anggota dengan id: {}", id);
+        return ResponseEntity.ok(anggotaService.deleAnggota(id));
     }
 }
