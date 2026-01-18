@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/peminjaman")
 public class PeminjamanController {
@@ -18,37 +22,43 @@ public class PeminjamanController {
 
     // Get Peminjaman + Buku + Anggota
     @GetMapping("/{id}/details")
-    public ResponseTemplate getPeminjamanWithDetails(@PathVariable Long id) {
-        return peminjamanService.getPeminjamanWithDetailsById(id);
+    public ResponseEntity<ResponseTemplate> getPeminjamanWithDetails(@PathVariable Long id) {
+        log.info("Mencari peminjaman dengan ID: {}", id);
+        return ResponseEntity.ok(peminjamanService.getPeminjamanWithDetailsById(id));
     }
 
     // Create
     @PostMapping
-    public Peminjaman createPeminjaman(@RequestBody Peminjaman peminjaman) {
-        return peminjamanService.savePeminjaman(peminjaman);
+    public ResponseEntity<Peminjaman> createPeminjaman(@RequestBody Peminjaman peminjaman) {
+        log.info("Menambahkan peminjaman baru: {}", peminjaman);
+        return ResponseEntity.ok(peminjamanService.savePeminjaman(peminjaman));
     }
 
     // Read all
     @GetMapping
-    public List<Peminjaman> getAllPeminjaman() {
-        return peminjamanService.getAllPeminjamans();
+    public ResponseEntity<List<Peminjaman>> getAllPeminjaman() {
+        log.info("Mencari semua peminjaman");
+        return ResponseEntity.ok(peminjamanService.getAllPeminjamans());
     }
 
     // Read by ID
     @GetMapping("/{id}")
-    public Peminjaman getPeminjamanById(@PathVariable Long id) {
-        return peminjamanService.getPeminjamanById(id).orElse(null);
+    public ResponseEntity<Peminjaman> getPeminjamanById(@PathVariable Long id) {
+        log.info("Mencari peminjaman dengan ID: {}", id);
+        return ResponseEntity.ok(peminjamanService.getPeminjamanById(id).orElse(null));
     }
 
     // Update
     @PutMapping("/{id}")
-    public Peminjaman updatePeminjaman(@PathVariable Long id, @RequestBody Peminjaman peminjamanDetails) {
-        return peminjamanService.updatePeminjaman(id, peminjamanDetails);
+    public ResponseEntity<Peminjaman> updatePeminjaman(@PathVariable Long id, @RequestBody Peminjaman peminjamanDetails) {
+        log.info("Memperbarui peminjaman dengan ID: {}", id);
+        return ResponseEntity.ok(peminjamanService.updatePeminjaman(id, peminjamanDetails));
     }
 
     // Delete
     @DeleteMapping("/{id}")
-    public String deletePeminjaman(@PathVariable Long id) {
-        return peminjamanService.deletePeminjaman(id);
+    public ResponseEntity<String> deletePeminjaman(@PathVariable Long id) {
+        log.info("Menghapus peminjaman dengan ID: {}", id);
+        return ResponseEntity.ok(peminjamanService.deletePeminjaman(id));
     }
 }
