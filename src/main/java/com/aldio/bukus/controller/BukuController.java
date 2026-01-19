@@ -19,13 +19,13 @@ public class BukuController {
 
     @GetMapping
     public ResponseEntity<List<Buku>> getAllBuku() {
-        log.info("berhasil mengambil semua buku");
+        log.info("berhasil oke");
         return ResponseEntity.ok(bukuService.getAllBuku());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Buku> getBukuById(@PathVariable Long id) {
-        log.info("Berhasil Mendapatkan buku bedasarkan id");
+        log.info("Berhasil Mendapatkan buku bedasarkan id", getBukuById(id));
         return ResponseEntity.ok(bukuService.getBukuById(id));
     }
 
